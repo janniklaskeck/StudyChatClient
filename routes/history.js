@@ -18,4 +18,4 @@ exports.history = function(req, resa) {
 	}).end();
 	
 	
-}
+};

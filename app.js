@@ -21,19 +21,24 @@ app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(express.cookieParser('S3CRE7'));
+app.use(express.session());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 
 app.get('/', routes.index);
 app.get('/users', user.list);
-app.get('/messages', history.history)
-app.get('/sendmessage', sendmsg.send)
+app.get('/messages', history.history);
+app.get('/sendmessage', sendmsg.send);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
+

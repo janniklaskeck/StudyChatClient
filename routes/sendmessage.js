@@ -3,6 +3,7 @@
  */
 
 var http = require('http');
+
 exports.send = function(req, resa) {
 	var options = {
 		host : 'dachatserver.mybluemix.net',
@@ -10,13 +11,14 @@ exports.send = function(req, resa) {
 		path : '/message',
 		method : 'POST'
 	};
-	
-	const request = http.request(options, function(res) {
+
+	var request = http.request(options, function(res) {
 		resa.redirect("/");
 	});
-	var user = req.query.user;
-	var msg = req.query.message;
+	var user = req.query.Username;
+	var msg = req.query.Message;
+	req.session.user = user;
 	request.write("{'username':'" + user + "','content':'" + msg + "'}");
 	request.end();
-	
-}
+
+};

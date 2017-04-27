@@ -8,8 +8,8 @@
     <h1><%= title %></h1>
     <textarea name="Messages" cols="80" rows="30" minlength="80" maxlength="80" readonly><%= msgs %></textarea>
 	<form action="/sendmessage" method="GET">
-		<input type="text" name="user" value="anon"/>
-	    <input type="text" name="message" required />
+		<input type="text" name="Username" value="<%= user %>"/>
+	    <input type="text" name="Message" required autofocus />
 	    <input type="submit" value="Send Message" />
 	</form>
   </body>
