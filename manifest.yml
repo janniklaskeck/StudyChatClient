@@ -5,4 +5,3 @@ applications:
    path: .
    memory: 256M
    instances: 1
-   command: node app.js
