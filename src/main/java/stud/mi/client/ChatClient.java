@@ -27,7 +27,7 @@ public class ChatClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        LOGGER.debug("Connection closed");
+        LOGGER.debug("Connection closed: code {}, reason {}, fromRemote {}", code, reason, remote);
     }
 
     @Override

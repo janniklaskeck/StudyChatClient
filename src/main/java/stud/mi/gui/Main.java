@@ -23,31 +23,37 @@ import stud.mi.client.ChatClient;
 public class Main extends UI {
 
     private static final long serialVersionUID = -720922173696713289L;
+    private ChatClient client;
 
     @Override
     protected void init(VaadinRequest request) {
         initContent();
-        URI server = null;
-        try {
-            server = new URI("ws://studychatserver.mybluemix.net:8080");
-        } catch (URISyntaxException e) {
-        }
-        final ChatClient client = new ChatClient(server);
-        client.connect();
     }
 
     private void initContent() {
         final VerticalLayout verticalLayout = new VerticalLayout();
         final TextArea textArea = new TextArea();
         final TextField textField = new TextField();
+        final Button connectButton = new Button("Connect");
+        connectButton.addClickListener(event -> {
+            URI server = null;
+            try {
+                server = new URI("ws://studychatserver.mybluemix.net");
+            } catch (URISyntaxException e) {
+            }
+            client = new ChatClient(server);
+            client.connect();
+        });
         final Button button = new Button("Send Message");
         button.addClickListener(event -> {
             final String message = textField.getValue();
             textArea.setValue(textArea.getValue() + System.lineSeparator() + message);
+            client.send(message);
         });
         verticalLayout.addComponent(textArea);
         verticalLayout.addComponent(textField);
         verticalLayout.addComponent(button);
+        verticalLayout.addComponent(connectButton);
         setContent(verticalLayout);
     }
 
