@@ -29,7 +29,7 @@ public class ChatClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         LOGGER.trace("Message received: {}", message);
-        MainLayout.addMessage("anon", message);
+        MainLayout.addMessage("anon", message, false);
     }
 
     @Override

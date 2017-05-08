@@ -52,7 +52,7 @@ public class MainLayout extends GridLayout {
         button.addClickListener(event -> {
             final String message = textField.getValue();
             final String user = userNameTextField.getValue();
-            addMessage(user, message);
+            addMessage(user, message, true);
             textField.setValue("");
         });
         button.setClickShortcut(KeyCode.ENTER);
@@ -67,7 +67,7 @@ public class MainLayout extends GridLayout {
         addComponent(userList, 1, 1);
     }
 
-    public static void addMessage(final String user, final String message) {
+    public static void addMessage(final String user, final String message, final boolean doSend) {
         final Set<String> users = new HashSet<>(userList.getValue());
         if (!users.contains(user)) {
             users.add(user);
@@ -78,7 +78,9 @@ public class MainLayout extends GridLayout {
             oldValue += System.lineSeparator();
         }
         messageTextArea.setValue(String.format("%s%s: %s", oldValue, user, message));
-        client.send(message);
+        if (doSend) {
+            client.send(message);
+        }
     }
 
 }
