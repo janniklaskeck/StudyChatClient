@@ -1,6 +1,6 @@
 ---
 applications:
- - name: DaChatClient
+ - name: StudyChatClient
    random-route: true
    path: .
    memory: 256M
