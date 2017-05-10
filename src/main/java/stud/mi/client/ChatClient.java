@@ -23,7 +23,7 @@ public class ChatClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         LOGGER.debug("Connection opened");
-        send("USER " + userName);
+        // send("USER " + userName);
     }
 
     @Override

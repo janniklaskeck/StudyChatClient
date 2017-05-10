@@ -41,7 +41,11 @@ public class MainLayout extends GridLayout {
             if (userNameTextField.getValue() != "") {
                 URI server = null;
                 try {
-                    server = new URI("ws://studychatserver.mybluemix.net");
+                    if (System.getenv("PORT") != null) {
+                        server = new URI("ws://studychatserver.mybluemix.net");
+                    } else {
+                        server = new URI("ws://127.0.0.1:8080");
+                    }
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
