@@ -2,6 +2,6 @@
 applications:
  - name: StudyChatClient
    random-route: true
-   path: .
+   path: build/libs/StudyChatClient-0.1.0.war
    memory: 256M
    instances: 1
