@@ -1,8 +1,7 @@
 ---
 applications:
- - name: DaChatClient
+ - name: StudyChatClient
    random-route: true
    path: .
    memory: 256M
    instances: 1
-   command: node app.js
