@@ -13,6 +13,10 @@ buildscript {
     }
 }
 
+repositories {
+    maven { url "http://maven.vaadin.com/vaadin-addons" }
+}
+
 jar {
     baseName = 'StudyChatClient'
     version =  '0.1.0'
@@ -52,6 +56,9 @@ dependencies {
     compile "com.vaadin:vaadin-server:$vaadinVersion"
     compile "com.vaadin:vaadin-client-compiled:$vaadinVersion"
     compile "com.vaadin:vaadin-themes:$vaadinVersion"
+    compile group: 'com.vaadin', name: 'vaadin-cdi', version:'2.0.0'
+	compile group: 'org.vaadin', name: 'cdi-helpers', version:'2.1'
+	providedCompile group: 'javax', name: 'javaee-web-api', version:'7.0'
     testCompile 'junit:junit:4.12'
 
 }
