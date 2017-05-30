@@ -7,45 +7,64 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import stud.mi.gui.MainLayout;
+import stud.mi.gui.ChatView;
+import stud.mi.message.Message;
+import stud.mi.message.MessageType;
 
 public class ChatClient extends WebSocketClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
 
-    private String userName;
+	public long userID = -1L;
+	public String channel = "";
+	private ChatView controller;
 
-    public ChatClient(URI serverURI, final String userName) {
-        super(serverURI);
-        this.userName = userName;
-    }
+	public ChatClient(final URI serverURI, final ChatView controller) {
+		super(serverURI);
+		this.controller = controller;
+	}
 
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        LOGGER.debug("Connection opened");
-        // send("USER " + userName);
-    }
+	@Override
+	public void onOpen(ServerHandshake handshakedata) {
+		LOGGER.debug("Open Connection");
 
-    @Override
-    public void onMessage(String message) {
-        LOGGER.trace("Message received: {}", message);
-        MainLayout.addMessage("anon", message, false);
-    }
+	}
 
-    @Override
-    public void onClose(int code, String reason, boolean remote) {
-        LOGGER.debug("Connection closed: code {}, reason {}, fromRemote {}", code, reason, remote);
-    }
+	@Override
+	public void onMessage(String message) {
+		LOGGER.debug("Received Message: {}", message);
+		parseMessage(message);
+	}
 
-    @Override
-    public void onError(Exception ex) {
-        LOGGER.error("Error", ex);
-    }
+	@Override
+	public void onClose(int code, String reason, boolean remote) {
+		LOGGER.debug("Close Connection");
 
-    @Override
-    public void send(final String message) {
-        super.send(message);
-        LOGGER.debug("Send Message: '{}'", message);
-    }
+	}
+
+	@Override
+	public void onError(Exception ex) {
+		LOGGER.error("Error", ex);
+
+	}
+
+	private void parseMessage(final String message) {
+		final Message msg = new Message(message);
+		switch (msg.getType()) {
+		case MessageType.USER_JOIN:
+			if (msg.getUserID() > 0) {
+				this.userID = msg.getUserID();
+			}
+			break;
+		case MessageType.ACK_CHANNEL_JOIN:
+			this.channel = msg.getChannelName();
+			break;
+		case MessageType.CHANNEL_MESSAGE:
+			this.controller.addMessage(msg.getUserName(), msg.getMessage());
+			break;
+		default:
+			System.out.println("Message Type unknown: " + msg.getType());
+		}
+	}
 
 }
