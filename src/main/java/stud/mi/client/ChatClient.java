@@ -22,6 +22,7 @@ public class ChatClient extends WebSocketClient {
 	public ChatClient(final URI serverURI, final ChatView controller) {
 		super(serverURI);
 		this.controller = controller;
+		LOGGER.debug("Created ChatClient with Server URI {}.", serverURI.toString());
 	}
 
 	@Override
