@@ -63,7 +63,7 @@ public class ChatView extends MVerticalLayout implements View {
 		client = new ChatClient(server, this);
 
 		connectButton.addClickListener(event -> {
-			if ("".equals(userNameTextField.getValue())) {
+			if (!"".equals(userNameTextField.getValue())) {
 				boolean success = false;
 				try {
 					success = client.connectBlocking();
