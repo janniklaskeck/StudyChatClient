@@ -48,26 +48,14 @@ public class ChatView extends MVerticalLayout implements View {
 
 	private static final String LOCAL_ADDRESS = "ws://127.0.0.1:8080";
 	private static final String REMOTE_ADDRESS = "ws://studychatserver.mybluemix.net";
-	private URI server = null;
 
 	@PostConstruct
 	void init() {
 		setSizeFull();
-		try {
-			if (server == null) {
-				if (System.getenv("PORT") != null) {
-					server = new URI(REMOTE_ADDRESS);
-				} else {
-					server = new URI(LOCAL_ADDRESS);
-				}
-			}
-		} catch (URISyntaxException e) {
-			LOGGER.error("Could create URI.", e);
-		}
 
 		connectButton.addClickListener(event -> {
 			if (!"".equals(userNameTextField.getValue())) {
-				client = new ChatClient(server, this);
+				client = new ChatClient(getServerURI(), this);
 				boolean success = false;
 				try {
 					success = client.connectBlocking();
@@ -142,4 +130,16 @@ public class ChatView extends MVerticalLayout implements View {
 		}
 	}
 
+	private static URI getServerURI() {
+		try {
+			if (System.getenv("PORT") != null) {
+				return new URI(REMOTE_ADDRESS);
+			} else {
+				return new URI(LOCAL_ADDRESS);
+			}
+		} catch (URISyntaxException e) {
+			LOGGER.error("Could not create URI.", e);
+		}
+		return null;
+	}
 }
