@@ -15,6 +15,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
@@ -34,7 +35,7 @@ public class ChatView extends MVerticalLayout implements View {
 
 	private static final long serialVersionUID = -5681201225902032837L;
 
-	private static ChatClient client;
+	private ChatClient client;
 
 	private static final ListSelect<String> userList = new ListSelect<>();
 	private static final TextArea messageTextArea = new TextArea();
@@ -47,15 +48,18 @@ public class ChatView extends MVerticalLayout implements View {
 
 	private static final String LOCAL_ADDRESS = "ws://127.0.0.1:8080";
 	private static final String REMOTE_ADDRESS = "ws://studychatserver.mybluemix.net";
-	private static URI server = null;
+	private URI server = null;
 
 	@PostConstruct
 	void init() {
+		setSizeFull();
 		try {
-			if (System.getenv("PORT") != null) {
-				server = new URI(REMOTE_ADDRESS);
-			} else {
-				server = new URI(LOCAL_ADDRESS);
+			if (server == null) {
+				if (System.getenv("PORT") != null) {
+					server = new URI(REMOTE_ADDRESS);
+				} else {
+					server = new URI(LOCAL_ADDRESS);
+				}
 			}
 		} catch (URISyntaxException e) {
 			LOGGER.error("Could create URI.", e);
@@ -90,6 +94,21 @@ public class ChatView extends MVerticalLayout implements View {
 		});
 		sendButton.setClickShortcut(KeyCode.ENTER);
 		sendButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
+
+		titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
+		titleLabel.addStyleName(ValoTheme.LABEL_H1);
+
+		messageTextArea.setWidth("90%");
+		setComponentAlignment(messageTextArea, Alignment.TOP_CENTER);
+
+		setComponentAlignment(joinChannelButton, Alignment.MIDDLE_LEFT);
+
+		textField.setWidth("90%");
+		setComponentAlignment(textField, Alignment.MIDDLE_CENTER);
+
+		sendButton.setWidth("90%");
+		setComponentAlignment(sendButton, Alignment.MIDDLE_CENTER);
+
 		add(titleLabel);
 		add(messageTextArea);
 		add(joinChannelButton);
@@ -98,9 +117,6 @@ public class ChatView extends MVerticalLayout implements View {
 		add(userNameTextField);
 		add(connectButton);
 		add(userList);
-
-		// button.setStyleName(ValoTheme.BUTTON_LARGE);
-		// button.addStyleName(ValoTheme.BUTTON_PRIMARY);
 
 		setMargin(new MarginInfo(false, true, true, true));
 		setStyleName(ValoTheme.LAYOUT_CARD);
@@ -117,7 +133,7 @@ public class ChatView extends MVerticalLayout implements View {
 		messageTextArea.setValue(previous + msg);
 	}
 
-	public static void closeConnection() {
+	public void closeConnection() {
 		try {
 			client.closeBlocking();
 		} catch (InterruptedException e) {
