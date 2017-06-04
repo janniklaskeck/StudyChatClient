@@ -6,13 +6,13 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.UI;
 
 @Theme("valo")
-@SpringUI(path = "")
-public class ChatUI extends UI {
+@SpringUI(path = "local")
+public class ChatUILocal extends UI {
 
     private static final long serialVersionUID = 903938514945760669L;
 
     @Override
     protected void init(VaadinRequest request) {
-        setContent(new ChatView(true));
+        setContent(new ChatView(false));
     }
 }
