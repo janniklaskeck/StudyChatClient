@@ -3,14 +3,9 @@ package stud.mi.gui;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vaadin.cdiviewmenu.ViewMenuItem;
-import org.vaadin.viritin.layouts.MVerticalLayout;
 
-import com.vaadin.cdi.CDIView;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
@@ -21,21 +16,19 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 import stud.mi.client.ChatClient;
 import stud.mi.message.MessageUtil;
 
-@CDIView("")
-@ViewMenuItem()
-
-public class ChatView extends MVerticalLayout implements View {
+public class ChatView extends VerticalLayout implements View {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatView.class);
 
 	private static final long serialVersionUID = -5681201225902032837L;
 
-	private ChatClient client;
+	private transient ChatClient client;
 
 	private static final ListSelect<String> userList = new ListSelect<>();
 	private static final TextArea messageTextArea = new TextArea();
@@ -46,11 +39,10 @@ public class ChatView extends MVerticalLayout implements View {
 	private static final Button sendButton = new Button("Send Message");
 	private static final Label titleLabel = new Label("Student Chat Server");
 
-	private static final String LOCAL_ADDRESS = "ws://127.0.0.1:8080";
+	private static final String LOCAL_ADDRESS = "ws://127.0.0.1:5000";
 	private static final String REMOTE_ADDRESS = "ws://studychatserver.mybluemix.net";
 
-	@PostConstruct
-	void init() {
+	public ChatView() {
 		setSizeFull();
 
 		connectButton.addClickListener(event -> {
@@ -72,15 +64,28 @@ public class ChatView extends MVerticalLayout implements View {
 			}
 		});
 
-		joinChannelButton
-				.addClickListener(event -> client.send(MessageUtil.buildChannelJoinMessage("default", client.userID)));
+		joinChannelButton.addClickListener(event -> {
+			if (client.isConnectedToChannel()) {
+				client.send(MessageUtil.buildChannelJoinMessage("default", client.getUserID()));
+			}
+		});
 
 		sendButton.addClickListener(event -> {
 			final String message = textField.getValue();
-			client.send(MessageUtil.buildSendMessage(message, client.userID));
+			client.send(MessageUtil.buildSendMessage(message, client.getUserID()));
 			textField.clear();
 		});
 		sendButton.setClickShortcut(KeyCode.ENTER);
+
+		addComponent(titleLabel);
+		addComponent(messageTextArea);
+		addComponent(joinChannelButton);
+		addComponent(textField);
+		addComponent(sendButton);
+		addComponent(userNameTextField);
+		addComponent(connectButton);
+		addComponent(userList);
+
 		sendButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
 
 		titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
@@ -96,15 +101,6 @@ public class ChatView extends MVerticalLayout implements View {
 
 		sendButton.setWidth("90%");
 		setComponentAlignment(sendButton, Alignment.MIDDLE_CENTER);
-
-		add(titleLabel);
-		add(messageTextArea);
-		add(joinChannelButton);
-		add(textField);
-		add(sendButton);
-		add(userNameTextField);
-		add(connectButton);
-		add(userList);
 
 		setMargin(new MarginInfo(false, true, true, true));
 		setStyleName(ValoTheme.LAYOUT_CARD);
@@ -141,5 +137,15 @@ public class ChatView extends MVerticalLayout implements View {
 			LOGGER.error("Could not create URI.", e);
 		}
 		return null;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 }

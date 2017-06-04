@@ -1,21 +1,16 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE")
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'war'
-apply plugin: 'org.akhikhl.gretty'
-
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'org.akhikhl.gretty:gretty:1.4.0'
-    }
-}
-
-repositories {
-    maven { url "http://maven.vaadin.com/vaadin-addons" }
-}
+apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'StudyChatClient'
@@ -29,6 +24,8 @@ war {
 
 repositories {
     mavenCentral()
+    maven { url "https://repository.jboss.org/nexus/content/repositories/releases" }
+    maven { url "http://maven.vaadin.com/vaadin-addons" }
 }
 
 ext {
@@ -40,25 +37,20 @@ ext {
     vaadinVersion = "8.0.5"
 }
 
-gretty {
-    contextPath = "/"
-    port = 80
+dependencyManagement {
+  imports {
+    mavenBom 'com.vaadin:vaadin-bom:8.0.0'
+  }
 }
 
 dependencies {
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-    compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
-    compile "org.apache.logging.log4j:log4j-core:$log4jVersion"
-    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion"
-    compile "org.apache.logging.log4j:log4j-jul:$log4jVersion"
+
     compile "com.google.code.gson:gson:$gsonVersion"
     compile "org.java-websocket:Java-WebSocket:$webSocketVersion"
-    compile "com.vaadin:vaadin-server:$vaadinVersion"
-    compile "com.vaadin:vaadin-client-compiled:$vaadinVersion"
-    compile "com.vaadin:vaadin-themes:$vaadinVersion"
-    compile group: 'com.vaadin', name: 'vaadin-cdi', version:'2.0.0'
-	compile group: 'org.vaadin', name: 'cdi-helpers', version:'2.1'
-	providedCompile group: 'javax', name: 'javaee-web-api', version:'7.0'
+	compile("org.springframework.boot:spring-boot-starter-web")
+	compile("com.vaadin:vaadin-spring-boot-starter")
+	compile("com.vaadin:vaadin-bom:$vaadinVersion")
+	
     testCompile 'junit:junit:4.12'
 
 }

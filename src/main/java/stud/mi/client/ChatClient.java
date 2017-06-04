@@ -15,14 +15,14 @@ public class ChatClient extends WebSocketClient {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
 
-	public long userID = -1L;
-	public String channel = "";
+	private long userID = -1L;
+	private String channel = "";
 	private ChatView controller;
 
 	public ChatClient(final URI serverURI, final ChatView controller) {
 		super(serverURI);
 		this.controller = controller;
-		LOGGER.debug("Created ChatClient with Server URI {}.", serverURI.toString());
+		LOGGER.debug("Created ChatClient with Server URI {}.", serverURI);
 	}
 
 	@Override
@@ -64,8 +64,24 @@ public class ChatClient extends WebSocketClient {
 			this.controller.addMessage(msg.getUserName(), msg.getMessage());
 			break;
 		default:
-			System.out.println("Message Type unknown: " + msg.getType());
+			LOGGER.error("Message Type unknown: {}", msg.getType());
 		}
+	}
+
+	public long getUserID() {
+		return userID;
+	}
+
+	public String getChannel() {
+		return channel;
+	}
+
+	public boolean isConnected() {
+		return userID != -1L;
+	}
+
+	public boolean isConnectedToChannel() {
+		return isConnected() && !channel.isEmpty();
 	}
 
 }
