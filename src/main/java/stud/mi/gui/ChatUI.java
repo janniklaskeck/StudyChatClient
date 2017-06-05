@@ -16,7 +16,7 @@ public class ChatUI extends UI {
 
     @Override
     protected void init(VaadinRequest request) {
-        view = new ChatView(false);
+        view = new ChatView(true);
         setContent(view);
         setPollInterval(500);
         addDetachListener(event -> {
