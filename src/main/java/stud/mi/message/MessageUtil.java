@@ -2,55 +2,57 @@ package stud.mi.message;
 
 import com.google.gson.JsonObject;
 
+import stud.mi.client.ChatClient;
+
 public class MessageUtil {
 
-	private static final String VERSION = "version";
-	private static final String TYPE = "type";
-	private static final String USER_ID = "userID";
-	private static final String MESSAGE = "message";
-	private static final String CONTENT = "content";
-	private static final String CHANNEL_NAME = "channelName";
-	private static final String USER_NAME = "userName";
+    private static final String VERSION = "version";
+    private static final String TYPE = "type";
+    private static final String USER_ID = "userID";
+    private static final String MESSAGE = "message";
+    private static final String CONTENT = "content";
+    private static final String CHANNEL_NAME = "channelName";
+    private static final String USER_NAME = "userName";
 
-	private MessageUtil() {
-	}
+    private MessageUtil() {
+    }
 
-	public static String buildSendMessage(final String message, final long userID) {
-		final JsonObject jo = new JsonObject();
-		jo.addProperty(VERSION, 1);
-		jo.addProperty(TYPE, MessageType.CHANNEL_MESSAGE);
+    public static Message buildHeartbeatMessage(final long userID) {
+        final JsonObject msgBase = buildMessageBaseJson(MessageType.USER_HEARTBEAT);
+        final Message msg = new Message(msgBase);
+        msg.getContent().addProperty(USER_ID, userID);
+        return msg;
+    }
 
-		final JsonObject joMsg = new JsonObject();
-		joMsg.addProperty(USER_ID, userID);
-		joMsg.addProperty(MESSAGE, message);
+    public static Message buildSendMessage(final String message, final long userID) {
+        final JsonObject msgBase = buildMessageBaseJson(MessageType.CHANNEL_MESSAGE);
+        final Message msg = new Message(msgBase);
+        msg.getContent().addProperty(USER_ID, userID);
+        msg.getContent().addProperty(MESSAGE, message);
+        return msg;
+    }
 
-		jo.add(CONTENT, joMsg);
-		return jo.toString();
-	}
+    public static Message buildChannelJoinMessage(final String channelName, final long userID) {
+        final JsonObject msgBase = buildMessageBaseJson(MessageType.CHANNEL_JOIN);
+        final Message msg = new Message(msgBase);
+        msg.getContent().addProperty(USER_ID, userID);
+        msg.getContent().addProperty(CHANNEL_NAME, channelName);
+        return msg;
+    }
 
-	public static String buildChannelJoinMessage(final String channelName, final long userID) {
-		final JsonObject jo = new JsonObject();
-		jo.addProperty(VERSION, 1);
-		jo.addProperty(TYPE, MessageType.CHANNEL_JOIN);
+    public static Message buildUserJoinMessage(final String userName) {
+        final JsonObject msgBase = buildMessageBaseJson(MessageType.USER_JOIN);
+        final Message msg = new Message(msgBase);
+        msg.getContent().addProperty(USER_NAME, userName);
+        return msg;
+    }
 
-		final JsonObject joMsg = new JsonObject();
-		joMsg.addProperty(USER_ID, userID);
-		joMsg.addProperty(CHANNEL_NAME, channelName);
-
-		jo.add(CONTENT, joMsg);
-		return jo.toString();
-	}
-
-	public static String buildUserJoinMessage(final String userName) {
-		final JsonObject jo = new JsonObject();
-		jo.addProperty(VERSION, 1);
-		jo.addProperty(TYPE, MessageType.USER_JOIN);
-
-		final JsonObject joMsg = new JsonObject();
-		joMsg.addProperty(USER_NAME, userName);
-
-		jo.add(CONTENT, joMsg);
-		return jo.toString();
-	}
+    public static JsonObject buildMessageBaseJson(final String type) {
+        final JsonObject jo = new JsonObject();
+        jo.addProperty(VERSION, ChatClient.PROTOCOL_VERSION);
+        jo.addProperty(TYPE, type);
+        jo.add(CONTENT, new JsonObject());
+        return jo;
+    }
 
 }

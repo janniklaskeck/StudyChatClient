@@ -12,14 +12,22 @@ import com.vaadin.ui.UI;
 public class ChatUI extends UI {
 
     private static final long serialVersionUID = 903938514945760669L;
+    private ChatView view;
 
     @Override
     protected void init(VaadinRequest request) {
-        setContent(new ChatView(true));
+        view = new ChatView(false);
+        setContent(view);
         setPollInterval(500);
+        addDetachListener(event -> {
+            System.out.println("Closing View!");
+            if (view.getClient() != null) {
+                view.getClient().stopTimer();
+            }
+        });
     }
 
-    @WebServlet(urlPatterns = "/*", name = "ChatUIServlet", asyncSupported = true)
+    @WebServlet(name = "ChatUIServlet", asyncSupported = true)
     @VaadinServletConfiguration(ui = ChatUI.class, productionMode = false)
     public static class ChatUIServlet extends VaadinServlet {
     }

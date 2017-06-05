@@ -36,7 +36,7 @@ public class MessageTextField extends HorizontalLayout {
     public void addClickListener(final ChatView view) {
         sendButton.addClickListener(event -> {
             final String message = sendTextField.getValue();
-            view.getClient().send(MessageUtil.buildSendMessage(message, view.getClient().getUserID()));
+            view.getClient().send(MessageUtil.buildSendMessage(message, view.getClient().getUserID()).toJson());
             sendTextField.clear();
         });
     }

@@ -45,7 +45,8 @@ public class ChannelMessageUserComponent extends GridLayout {
     public void addClickListener(final ChatView view) {
         channelList.addClickListener(event -> {
             if (!view.getClient().isConnectedToChannel()) {
-                view.getClient().send(MessageUtil.buildChannelJoinMessage("default", view.getClient().getUserID()));
+                view.getClient()
+                        .send(MessageUtil.buildChannelJoinMessage("default", view.getClient().getUserID()).toJson());
             }
         });
     }

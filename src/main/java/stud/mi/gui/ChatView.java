@@ -41,7 +41,6 @@ public class ChatView extends GridLayout implements View {
 
         setMargin(new MarginInfo(false, true, true, true));
         setStyleName(ValoTheme.LAYOUT_CARD);
-
     }
 
     private void setupActions() {

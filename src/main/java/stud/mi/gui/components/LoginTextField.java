@@ -40,7 +40,7 @@ public class LoginTextField extends HorizontalLayout {
                 }
                 if (success) {
                     final String userName = userNameTextField.getValue();
-                    client.send(MessageUtil.buildUserJoinMessage(userName));
+                    client.send(MessageUtil.buildUserJoinMessage(userName).toJson());
                 } else {
                     LOGGER.error("Connection to Server was unsuccessful!");
                 }

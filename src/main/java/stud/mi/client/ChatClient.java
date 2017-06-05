@@ -2,6 +2,8 @@ package stud.mi.client;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -10,21 +12,39 @@ import org.slf4j.LoggerFactory;
 
 import stud.mi.message.Message;
 import stud.mi.message.MessageType;
+import stud.mi.message.MessageUtil;
 import stud.mi.util.MessageListener;
 
 public class ChatClient extends WebSocketClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
+    private static final long HEARTBEAT_RATE = 10 * 1000L;
+    public static final int PROTOCOL_VERSION = 1;
 
     private long userID = -1L;
     private String channel = "";
     private final StringBuffer messageBuffer = new StringBuffer();
     private MessageListener channelMessageListener;
     private MessageListener userListener;
+    private Timer heartBeatTimer;
 
     public ChatClient(final URI serverURI) {
         super(serverURI);
         LOGGER.info("Created ChatClient with Server URI {}.", serverURI);
+        this.heartBeatTimer = new Timer(true);
+        heartBeatTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                LOGGER.trace("Running Heartbeat.");
+                if (isConnected()) {
+                    send(MessageUtil.buildHeartbeatMessage(userID).toJson());
+                }
+            }
+        }, 1000L, HEARTBEAT_RATE);
+    }
+
+    public void stopTimer() {
+        this.heartBeatTimer.cancel();
     }
 
     @Override
@@ -40,14 +60,12 @@ public class ChatClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        LOGGER.debug("Close Connection");
-
+        LOGGER.debug("Close Connection: Code {}, Reason {}, IsRemote {}", code, reason, remote);
     }
 
     @Override
     public void onError(Exception ex) {
         LOGGER.error("Error", ex);
-
     }
 
     private void parseMessage(final String message) {
@@ -64,7 +82,7 @@ public class ChatClient extends WebSocketClient {
         case MessageType.CHANNEL_MESSAGE:
             addMessage(msg);
             break;
-        case MessageType.CHANNEL_USER_JOIN:
+        case MessageType.CHANNEL_USER_CHANGE:
             this.userJoinedChannel(msg.getChannelUserNames());
             break;
         default:
