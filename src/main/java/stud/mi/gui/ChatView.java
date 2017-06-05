@@ -41,13 +41,12 @@ public class ChatView extends GridLayout implements View {
 
         setMargin(new MarginInfo(false, true, true, true));
         setStyleName(ValoTheme.LAYOUT_CARD);
+
     }
 
     private void setupActions() {
         loginTextField.addClickListener(connectToRemote, this);
-
         cmuComponent.addClickListener(this);
-
         messageTextField.addClickListener(this);
     }
 
@@ -60,7 +59,6 @@ public class ChatView extends GridLayout implements View {
         titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
         titleLabel.addStyleName(ValoTheme.LABEL_H1);
         setComponentAlignment(titleLabel, Alignment.TOP_CENTER);
-
     }
 
     @Override
@@ -79,7 +77,8 @@ public class ChatView extends GridLayout implements View {
 
     public void setClient(final ChatClient chatClient) {
         this.client = chatClient;
-        this.client.addMessageListener(buffer -> this.cmuComponent.setText(buffer.toString()));
+        this.client.addMessageListener(cmuComponent::setText);
+        this.client.addUserListener(cmuComponent::setUsers);
     }
 
     public ChatClient getClient() {

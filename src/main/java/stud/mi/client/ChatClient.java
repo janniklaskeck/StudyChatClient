@@ -1,6 +1,7 @@
 package stud.mi.client;
 
 import java.net.URI;
+import java.util.List;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -18,7 +19,8 @@ public class ChatClient extends WebSocketClient {
     private long userID = -1L;
     private String channel = "";
     private final StringBuffer messageBuffer = new StringBuffer();
-    private MessageListener listener;
+    private MessageListener channelMessageListener;
+    private MessageListener userListener;
 
     public ChatClient(final URI serverURI) {
         super(serverURI);
@@ -32,7 +34,7 @@ public class ChatClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        LOGGER.debug("Received Message: {}", message);
+        LOGGER.info("Received Message: {}", message);
         parseMessage(message);
     }
 
@@ -62,21 +64,37 @@ public class ChatClient extends WebSocketClient {
         case MessageType.CHANNEL_MESSAGE:
             addMessage(msg);
             break;
+        case MessageType.CHANNEL_USER_JOIN:
+            this.userJoinedChannel(msg.getChannelUserNames());
+            break;
         default:
             LOGGER.error("Message Type unknown: {}", msg.getType());
         }
     }
 
+    private void userJoinedChannel(List<String> channelUserNames) {
+        final StringBuilder builder = new StringBuilder();
+        for (final String userName : channelUserNames) {
+            builder.append(userName);
+            builder.append(',');
+        }
+        userListener.onMessage(builder.toString());
+    }
+
     private void addMessage(final Message msg) {
         final String message = String.format("%s: %s%s", msg.getUserName(), msg.getMessage(), System.lineSeparator());
         this.messageBuffer.append(message);
-        if (this.listener != null) {
-            listener.onMessageReceiverListener(messageBuffer);
+        if (this.channelMessageListener != null) {
+            channelMessageListener.onMessage(messageBuffer.toString());
         }
     }
 
     public void addMessageListener(final MessageListener listener) {
-        this.listener = listener;
+        this.channelMessageListener = listener;
+    }
+
+    public void addUserListener(final MessageListener listener) {
+        this.userListener = listener;
     }
 
     public long getUserID() {

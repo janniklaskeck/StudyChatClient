@@ -15,19 +15,22 @@ public class MessageTextField extends HorizontalLayout {
     private static final long serialVersionUID = -2240425973489197267L;
 
     private final Button sendButton = new Button("Send Message");
-    private final TextField sendTextField = new TextField("Message");
+    private final TextField sendTextField = new TextField();
 
     public MessageTextField() {
         super();
         addComponent(sendTextField);
         addComponent(sendButton);
         sendButton.setClickShortcut(KeyCode.ENTER);
-        sendTextField.setWidth("90%");
-        setComponentAlignment(sendTextField, Alignment.MIDDLE_CENTER);
+        sendTextField.setWidth("100%");
+        setExpandRatio(sendTextField, 1.0f);
+        setComponentAlignment(sendTextField, Alignment.MIDDLE_RIGHT);
 
-        sendButton.setWidth("40%");
+        sendButton.setWidth("100%");
         sendButton.addStyleName(ValoTheme.BUTTON_PRIMARY);
-        setComponentAlignment(sendButton, Alignment.MIDDLE_CENTER);
+        setExpandRatio(sendButton, 0.2f);
+        setComponentAlignment(sendButton, Alignment.MIDDLE_LEFT);
+        setWidth("100%");
     }
 
     public void addClickListener(final ChatView view) {
