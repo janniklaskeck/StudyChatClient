@@ -1,16 +1,6 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.3.RELEASE")
-    }
-}
-
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'war'
-apply plugin: 'org.springframework.boot'
 
 jar {
     baseName = 'StudyChatClient'
@@ -37,12 +27,6 @@ ext {
     vaadinVersion = "8.0.6"
 }
 
-dependencyManagement {
-  imports {
-    mavenBom "com.vaadin:vaadin-bom:$vaadinVersion"
-  }
-}
-
 dependencies {
     compile "org.slf4j:slf4j-api:$slf4jVersion"
     compile "org.apache.logging.log4j:log4j-api:$log4jVersion"
@@ -56,7 +40,7 @@ dependencies {
     compile("com.vaadin:vaadin-themes:$vaadinVersion")
 	compile("com.vaadin:vaadin-bom:$vaadinVersion")
 	compile("com.vaadin:vaadin-push:$vaadinVersion")
-	compileOnly("javax.servlet:javax.servlet-api:3.0.1")
+	compile("javax.servlet:javax.servlet-api:3.0.1")
 	
     testCompile 'junit:junit:4.12'
 
