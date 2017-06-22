@@ -7,7 +7,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.RichTextArea;
 
@@ -22,6 +24,7 @@ public class ChannelMessageUserComponent extends GridLayout {
 	private final ChannelList channelList = new ChannelList();
 	private final ListSelect<String> userList = new ListSelect<>();
 	private final RichTextArea messageTextArea = new RichTextArea();
+	private final Label msgLabel = new Label();
 
 	private static final String COMPONENT_HEIGHT = "275px";
 
@@ -29,17 +32,20 @@ public class ChannelMessageUserComponent extends GridLayout {
 		super(5, 1);
 
 		addComponent(channelList, 0, 0);
-		addComponent(messageTextArea, 1, 0, 3, 0);
+		// addComponent(messageTextArea, 1, 0, 3, 0);
+		addComponent(msgLabel, 1, 0, 3, 0);
 		addComponent(userList, 4, 0);
 		channelList.setWidth("100%");
 		channelList.setHeight(COMPONENT_HEIGHT);
 		userList.setWidth("100%");
 		userList.setHeight(COMPONENT_HEIGHT);
-		messageTextArea.setWidth("100%");
-		messageTextArea.setHeight(COMPONENT_HEIGHT);
-		messageTextArea.setReadOnly(true);
+		// messageTextArea.setWidth("100%");
+		// messageTextArea.setHeight(COMPONENT_HEIGHT);
+		// messageTextArea.setReadOnly(true);
+		msgLabel.setWidth("100%");
+		msgLabel.setHeight(COMPONENT_HEIGHT);
+		msgLabel.setContentMode(ContentMode.HTML);
 		setWidth("90%");
-
 	}
 
 	public void addClickListener(final ChatView view) {
@@ -53,8 +59,8 @@ public class ChannelMessageUserComponent extends GridLayout {
 
 	public void setText(final String value) {
 		LOGGER.info("Set Message Area Text");
-		messageTextArea.setValue(value);
-		messageTextArea.markAsDirty();
+		msgLabel.setValue(value);
+		msgLabel.markAsDirty();
 	}
 
 	public void setUsers(final String userNames) {

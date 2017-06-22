@@ -113,7 +113,7 @@ public class ChatClient extends WebSocketClient {
 	}
 
 	private void addMessage(final Message msg) {
-		final String message = String.format("%s: %s%s", msg.getUserName(), msg.getMessage(), System.lineSeparator());
+		final String message = String.format("%s: %s%s", msg.getUserName(), msg.getMessage(), "<br/>");
 		this.messageBuffer.append(message);
 		if (this.channelMessageListener != null) {
 			channelMessageListener.onMessage(messageBuffer.toString());
