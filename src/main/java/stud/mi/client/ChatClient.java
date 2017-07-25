@@ -1,6 +1,7 @@
 package stud.mi.client;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -13,139 +14,183 @@ import org.slf4j.LoggerFactory;
 import stud.mi.message.Message;
 import stud.mi.message.MessageType;
 import stud.mi.message.MessageUtil;
-import stud.mi.util.MessageListener;
+import stud.mi.util.ChannelMessageListener;
+import stud.mi.util.ChatMessageListener;
 
-public class ChatClient extends WebSocketClient {
+public class ChatClient extends WebSocketClient
+{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
-	private static final long HEARTBEAT_RATE = 10 * 1000L;
-	public static final int PROTOCOL_VERSION = 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatClient.class);
+    private static final long HEARTBEAT_RATE = 10 * 1000L;
+    public static final int PROTOCOL_VERSION = 1;
 
-	private long userID = -1L;
-	private String channel = "";
-	private final StringBuffer messageBuffer = new StringBuffer();
-	private MessageListener channelMessageListener;
-	private MessageListener userListener;
-	private MessageListener channelListener;
-	private Timer heartBeatTimer;
+    private long userID = -1L;
+    private String channel = "";
+    private ChatMessageListener channelMessageListener;
+    private ChannelMessageListener userListener;
+    private ChannelMessageListener channelListener;
+    private Timer heartBeatTimer;
 
-	public ChatClient(final URI serverURI) {
-		super(serverURI);
-		LOGGER.info("Created ChatClient with Server URI {}.", serverURI);
-		this.heartBeatTimer = new Timer(true);
-		heartBeatTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				LOGGER.trace("Running Heartbeat.");
-				if (isConnected()) {
-					send(MessageUtil.buildHeartbeatMessage(userID).toJson());
-				}
-			}
-		}, 1000L, HEARTBEAT_RATE);
-	}
+    public ChatClient(final URI serverURI)
+    {
+        super(serverURI);
+        ChatClient.LOGGER.info("Created ChatClient with Server URI {}.", serverURI);
+        this.heartBeatTimer = new Timer(true);
+        this.heartBeatTimer.scheduleAtFixedRate(new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                ChatClient.LOGGER.trace("Running Heartbeat.");
+                if (ChatClient.this.isConnected())
+                {
+                    ChatClient.this.send(MessageUtil.buildHeartbeatMessage(ChatClient.this.userID).toJson());
+                }
+            }
+        }, 1000L, ChatClient.HEARTBEAT_RATE);
+    }
 
-	public void stopTimer() {
-		this.heartBeatTimer.cancel();
-	}
+    public void addChannelListener(final ChannelMessageListener listener)
+    {
+        this.channelListener = listener;
+    }
 
-	@Override
-	public void onOpen(ServerHandshake handshakedata) {
-		LOGGER.debug("Open Connection");
-	}
+    private void addMessage(final Message msg)
+    {
+        if (this.channelMessageListener != null)
+        {
+            this.channelMessageListener.onMessage(msg);
+        }
+    }
 
-	@Override
-	public void onMessage(String message) {
-		LOGGER.info("Received Message: {}", message);
-		parseMessage(message);
-	}
+    public void addMessageListener(final ChatMessageListener listener)
+    {
+        this.channelMessageListener = listener;
+    }
 
-	@Override
-	public void onClose(int code, String reason, boolean remote) {
-		LOGGER.debug("Close Connection: Code {}, Reason {}, IsRemote {}", code, reason, remote);
-	}
+    public void addUserListener(final ChannelMessageListener listener)
+    {
+        this.userListener = listener;
+    }
 
-	@Override
-	public void onError(Exception ex) {
-		LOGGER.error("Error", ex);
-	}
+    public void disconnect()
+    {
+        if (this.isConnected())
+        {
+            try
+            {
+                this.closeBlocking();
+            }
+            catch (InterruptedException e)
+            {
+                ChatClient.LOGGER.error("Could not close Connection!", e);
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 
-	private void parseMessage(final String message) {
-		final Message msg = new Message(message);
-		switch (msg.getType()) {
-		case MessageType.USER_JOIN:
-			if (msg.getUserID() > 0) {
-				this.userID = msg.getUserID();
-			}
-			break;
-		case MessageType.ACK_CHANNEL_JOIN:
-			this.channel = msg.getChannelName();
-			break;
-		case MessageType.CHANNEL_MESSAGE:
-			addMessage(msg);
-			break;
-		case MessageType.CHANNEL_USER_CHANGE:
-			this.userJoinedChannel(msg.getChannelUserNames());
-			break;
-		case MessageType.CHANNEL_CHANGE:
-			receiveChannelNames(msg.getChannelNames());
-			break;
-		default:
-			LOGGER.error("Message Type unknown: {}", msg.getType());
-		}
-	}
+    public String getChannel()
+    {
+        return this.channel;
+    }
 
-	private void receiveChannelNames(final List<String> channelNames) {
-		final StringBuilder builder = new StringBuilder();
-		for (final String channelName : channelNames) {
-			builder.append(channelName);
-			builder.append(',');
-		}
-		channelListener.onMessage(builder.toString());
-	}
+    public long getUserID()
+    {
+        return this.userID;
+    }
 
-	private void userJoinedChannel(List<String> channelUserNames) {
-		final StringBuilder builder = new StringBuilder();
-		for (final String userName : channelUserNames) {
-			builder.append(userName);
-			builder.append(',');
-		}
-		userListener.onMessage(builder.toString());
-	}
+    public boolean isConnected()
+    {
+        return this.userID != -1L;
+    }
 
-	private void addMessage(final Message msg) {
-		final String message = String.format("%s: %s%s", msg.getUserName(), msg.getMessage(), "<br/>");
-		this.messageBuffer.append(message);
-		if (this.channelMessageListener != null) {
-			channelMessageListener.onMessage(messageBuffer.toString());
-		}
-	}
+    public boolean isConnectedToChannel()
+    {
+        return this.isConnected() && !this.channel.isEmpty();
+    }
 
-	public void addMessageListener(final MessageListener listener) {
-		this.channelMessageListener = listener;
-	}
+    @Override
+    public void onClose(final int code, final String reason, final boolean remote)
+    {
+        ChatClient.LOGGER.debug("Close Connection: Code {}, Reason {}, IsRemote {}", code, reason, remote);
+        this.userID = -1L;
+        this.channel = "";
+        this.userJoinedChannel(new ArrayList<>());
+        this.receiveChannelNames(new ArrayList<>());
+    }
 
-	public void addUserListener(final MessageListener listener) {
-		this.userListener = listener;
-	}
+    @Override
+    public void onError(final Exception ex)
+    {
+        ChatClient.LOGGER.error("Error", ex);
+    }
 
-	public void addChannelListener(final MessageListener listener) {
-		channelListener = listener;
-	}
+    @Override
+    public void onMessage(final String message)
+    {
+        ChatClient.LOGGER.info("Received Message: {}", message);
+        this.parseMessage(message);
+    }
 
-	public long getUserID() {
-		return userID;
-	}
+    @Override
+    public void onOpen(final ServerHandshake handshakedata)
+    {
+        ChatClient.LOGGER.debug("Open Connection");
+    }
 
-	public String getChannel() {
-		return channel;
-	}
+    private void parseMessage(final String message)
+    {
+        final Message msg = new Message(message);
+        switch (msg.getType())
+        {
+        case MessageType.USER_JOIN:
+            if (msg.getUserID() > 0)
+            {
+                this.userID = msg.getUserID();
+            }
+            break;
+        case MessageType.ACK_CHANNEL_JOIN:
+            this.channel = msg.getChannelName();
+            break;
+        case MessageType.CHANNEL_MESSAGE:
+            this.addMessage(msg);
+            break;
+        case MessageType.CHANNEL_USER_CHANGE:
+            this.userJoinedChannel(msg.getChannelUserNames());
+            break;
+        case MessageType.CHANNEL_CHANGE:
+            this.receiveChannelNames(msg.getChannelNames());
+            break;
+        default:
+            ChatClient.LOGGER.error("Message Type unknown: {}", msg.getType());
+        }
+    }
 
-	public boolean isConnected() {
-		return userID != -1L;
-	}
+    private void receiveChannelNames(final List<String> channelNames)
+    {
+        final StringBuilder builder = new StringBuilder();
+        for (final String channelName : channelNames)
+        {
+            builder.append(channelName);
+            builder.append(',');
+        }
+        this.channelListener.onMessage(builder.toString());
+    }
 
-	public boolean isConnectedToChannel() {
-		return isConnected() && !channel.isEmpty();
-	}
+    public void stopTimer()
+    {
+        this.heartBeatTimer.cancel();
+    }
+
+    private void userJoinedChannel(final List<String> channelUserNames)
+    {
+        final StringBuilder builder = new StringBuilder();
+        for (final String userName : channelUserNames)
+        {
+            builder.append(userName);
+            builder.append(',');
+        }
+        this.userListener.onMessage(builder.toString());
+    }
 
 }

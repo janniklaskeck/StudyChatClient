@@ -1,8 +1,7 @@
 package stud.mi.util;
 
 @FunctionalInterface
-public interface MessageListener {
-
+public interface ChannelMessageListener
+{
     void onMessage(final String message);
-
 }

@@ -16,72 +16,72 @@ import stud.mi.gui.components.ChannelMessageUserComponent;
 import stud.mi.gui.components.LoginTextField;
 import stud.mi.gui.components.MessageTextField;
 
-public class ChatView extends GridLayout implements View {
+public class ChatView extends GridLayout implements View
+{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ChatView.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatView.class);
 
-	private static final long serialVersionUID = -5681201225902032837L;
+    private static final long serialVersionUID = -5681201225902032837L;
 
-	private transient ChatClient client;
+    private transient ChatClient client;
 
-	private final ChannelMessageUserComponent cmuComponent = new ChannelMessageUserComponent();
-	private final MessageTextField messageTextField = new MessageTextField();
-	private final LoginTextField loginTextField = new LoginTextField();
-	private final Label titleLabel = new Label("Student Chat Server");
+    private final ChannelMessageUserComponent cmuComponent = new ChannelMessageUserComponent();
+    private final MessageTextField messageTextField = new MessageTextField();
+    private final LoginTextField loginTextField = new LoginTextField();
+    private final Label titleLabel = new Label("Student Chat Server");
 
-	private boolean connectToRemote = false;
+    public ChatView()
+    {
+        super(3, 4);
+        this.setSizeFull();
 
-	public ChatView(final boolean isRemote) {
-		super(3, 4);
-		connectToRemote = isRemote;
-		setSizeFull();
+        this.setupComponents();
 
-		setupComponents();
-		setupActions();
+        this.setMargin(new MarginInfo(false, true, true, true));
+        this.setStyleName(ValoTheme.LAYOUT_CARD);
+    }
 
-		setMargin(new MarginInfo(false, true, true, true));
-		setStyleName(ValoTheme.LAYOUT_CARD);
-	}
+    public void closeConnection()
+    {
+        try
+        {
+            this.client.closeBlocking();
+        }
+        catch (InterruptedException e)
+        {
+            ChatView.LOGGER.error("Closing of CLient was interrupted.", e);
+            Thread.currentThread().interrupt();
+        }
+    }
 
-	private void setupActions() {
-		loginTextField.addClickListener(connectToRemote, this);
-		cmuComponent.addClickListener(this);
-		messageTextField.addClickListener(this);
-	}
+    @Override
+    public void enter(final ViewChangeListener.ViewChangeEvent viewChangeEvent)
+    {
+        ChatView.LOGGER.info("Entered ChatView.");
+    }
 
-	private void setupComponents() {
-		addComponent(titleLabel, 0, 0, 2, 0);
-		addComponent(cmuComponent, 0, 1, 2, 1);
-		addComponent(messageTextField, 0, 2, 2, 2);
-		addComponent(loginTextField, 0, 3, 1, 3);
+    public ChatClient getClient()
+    {
+        return this.client;
+    }
 
-		titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
-		titleLabel.addStyleName(ValoTheme.LABEL_H1);
-		setComponentAlignment(titleLabel, Alignment.TOP_CENTER);
-	}
+    public void setClient(final ChatClient chatClient)
+    {
+        this.client = chatClient;
+        this.client.addMessageListener(this.cmuComponent::addMessage);
+        this.client.addUserListener(this.cmuComponent::setUsers);
+        this.client.addChannelListener(this.cmuComponent::setChannels);
+    }
 
-	@Override
-	public void enter(ViewChangeListener.ViewChangeEvent viewChangeEvent) {
-		LOGGER.info("Entered ChatView.");
-	}
+    private void setupComponents()
+    {
+        this.addComponent(this.titleLabel, 0, 0, 2, 0);
+        this.addComponent(this.cmuComponent, 0, 1, 2, 1);
+        this.addComponent(this.messageTextField, 0, 2, 2, 2);
+        this.addComponent(this.loginTextField, 0, 3, 1, 3);
 
-	public void closeConnection() {
-		try {
-			client.closeBlocking();
-		} catch (InterruptedException e) {
-			LOGGER.error("Closing of CLient was interrupted.", e);
-			Thread.currentThread().interrupt();
-		}
-	}
-
-	public void setClient(final ChatClient chatClient) {
-		this.client = chatClient;
-		this.client.addMessageListener(cmuComponent::setText);
-		this.client.addUserListener(cmuComponent::setUsers);
-		this.client.addChannelListener(cmuComponent::setChannels);
-	}
-
-	public ChatClient getClient() {
-		return this.client;
-	}
+        this.titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
+        this.titleLabel.addStyleName(ValoTheme.LABEL_H1);
+        this.setComponentAlignment(this.titleLabel, Alignment.TOP_CENTER);
+    }
 }
