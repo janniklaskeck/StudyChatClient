@@ -15,6 +15,7 @@ import stud.mi.client.ChatClient;
 import stud.mi.gui.components.ChannelMessageUserComponent;
 import stud.mi.gui.components.LoginTextField;
 import stud.mi.gui.components.MessageTextField;
+import stud.mi.util.ClientUtils;
 
 public class ChatView extends GridLayout implements View
 {
@@ -23,12 +24,8 @@ public class ChatView extends GridLayout implements View
 
     private static final long serialVersionUID = -5681201225902032837L;
 
-    private transient ChatClient client;
-
-    private final ChannelMessageUserComponent cmuComponent = new ChannelMessageUserComponent();
-    private final MessageTextField messageTextField = new MessageTextField();
-    private final LoginTextField loginTextField = new LoginTextField();
     private final Label titleLabel = new Label("Student Chat Server");
+    private transient ChatClient client = new ChatClient(ClientUtils.getServerURI());
 
     public ChatView()
     {
@@ -65,20 +62,15 @@ public class ChatView extends GridLayout implements View
         return this.client;
     }
 
-    public void setClient(final ChatClient chatClient)
-    {
-        this.client = chatClient;
-        this.client.addMessageListener(this.cmuComponent::addMessage);
-        this.client.addUserListener(this.cmuComponent::setUsers);
-        this.client.addChannelListener(this.cmuComponent::setChannels);
-    }
-
     private void setupComponents()
     {
+        final ChannelMessageUserComponent cmuComponent = new ChannelMessageUserComponent();
+        final MessageTextField messageTextField = new MessageTextField();
+        final LoginTextField loginTextField = new LoginTextField();
         this.addComponent(this.titleLabel, 0, 0, 2, 0);
-        this.addComponent(this.cmuComponent, 0, 1, 2, 1);
-        this.addComponent(this.messageTextField, 0, 2, 2, 2);
-        this.addComponent(this.loginTextField, 0, 3, 1, 3);
+        this.addComponent(cmuComponent, 0, 1, 2, 1);
+        this.addComponent(messageTextField, 0, 2, 2, 2);
+        this.addComponent(loginTextField, 0, 3, 1, 3);
 
         this.titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
         this.titleLabel.addStyleName(ValoTheme.LABEL_H1);

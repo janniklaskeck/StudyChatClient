@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.ui.GridLayout;
 
+import stud.mi.client.ChatClient;
 import stud.mi.gui.ChatView;
 import stud.mi.message.Message;
 import stud.mi.message.MessageUtil;
@@ -33,6 +34,7 @@ public class ChannelMessageUserComponent extends GridLayout
         this.addComponent(this.userList, 4, 0);
         this.setWidth("90%");
         this.addClickListener();
+        this.addListeners();
     }
 
     private void addClickListener()
@@ -46,6 +48,15 @@ public class ChannelMessageUserComponent extends GridLayout
                 view.getClient().send(msg);
             }
         });
+    }
+
+    public void addListeners()
+    {
+        final ChatView view = (ChatView) this.getParent();
+        final ChatClient client = view.getClient();
+        client.addMessageListener(this::addMessage);
+        client.addUserListener(this::setUsers);
+        client.addChannelListener(this::setChannels);
     }
 
     public void addMessage(final Message msg)

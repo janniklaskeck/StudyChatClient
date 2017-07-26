@@ -41,9 +41,9 @@ public class ChatClient extends WebSocketClient
             @Override
             public void run()
             {
-                ChatClient.LOGGER.trace("Running Heartbeat.");
                 if (ChatClient.this.isConnected())
                 {
+                    ChatClient.LOGGER.trace("Running Heartbeat.");
                     ChatClient.this.send(MessageUtil.buildHeartbeatMessage(ChatClient.this.userID).toJson());
                 }
             }
