@@ -12,7 +12,6 @@ import com.vaadin.ui.GridLayout;
 import stud.mi.client.ChatClient;
 import stud.mi.gui.ChatView;
 import stud.mi.message.Message;
-import stud.mi.message.MessageUtil;
 
 public class ChannelMessageUserComponent extends GridLayout
 {
@@ -33,27 +32,11 @@ public class ChannelMessageUserComponent extends GridLayout
         this.addComponent(this.channelTextArea, 1, 0, 3, 0);
         this.addComponent(this.userList, 4, 0);
         this.setWidth("90%");
-        this.addClickListener();
-        this.addListeners();
-    }
-
-    private void addClickListener()
-    {
-        final ChatView view = (ChatView) this.getParent();
-        this.channelList.addClickListener(event ->
-        {
-            if (view.getClient() != null && !view.getClient().isConnectedToChannel())
-            {
-                final String msg = MessageUtil.buildChannelJoinMessage("default", view.getClient().getUserID()).toJson();
-                view.getClient().send(msg);
-            }
-        });
     }
 
     public void addListeners()
     {
-        final ChatView view = (ChatView) this.getParent();
-        final ChatClient client = view.getClient();
+        final ChatClient client = this.getClient();
         client.addMessageListener(this::addMessage);
         client.addUserListener(this::setUsers);
         client.addChannelListener(this::setChannels);
@@ -62,6 +45,12 @@ public class ChannelMessageUserComponent extends GridLayout
     public void addMessage(final Message msg)
     {
         this.channelTextArea.addMessage(msg);
+    }
+
+    public ChatClient getClient()
+    {
+        final ChatView view = (ChatView) this.getParent();
+        return view.getClient();
     }
 
     public void setChannels(final String channelNames)

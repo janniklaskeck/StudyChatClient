@@ -4,10 +4,12 @@ import java.util.Set;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
+
+import stud.mi.client.ChatClient;
+import stud.mi.message.MessageUtil;
 
 public class ChannelList extends GridLayout
 {
@@ -15,7 +17,8 @@ public class ChannelList extends GridLayout
 
     private final Label channelListLabel = new Label("Channel List");
     private final ListSelect<String> channelListSelect = new ListSelect<>();
-    private final Button joinChannelButton = new Button("Join Default Channel");
+    private final Button joinChannelButton = new Button("Join default Channel");
+    private String currentSelectedChannel = "default";
 
     public ChannelList()
     {
@@ -30,17 +33,43 @@ public class ChannelList extends GridLayout
         this.setComponentAlignment(this.joinChannelButton, Alignment.TOP_LEFT);
         this.setWidth("100%");
         this.setHeight(ChannelMessageUserComponent.COMPONENT_HEIGHT);
+        this.addClickListener();
+        this.addSelectListener();
     }
 
-    public void addClickListener(final ClickListener listener)
+    private void addClickListener()
     {
-        this.joinChannelButton.addClickListener(listener);
+        this.joinChannelButton.addClickListener(event ->
+        {
+            if (this.getClient() != null && !this.getClient().isConnectedToChannel())
+            {
+                final String msg = MessageUtil.buildChannelJoinMessage(this.currentSelectedChannel, this.getClient().getUserID()).toJson();
+                this.getClient().send(msg);
+            }
+        });
+    }
+
+    private void addSelectListener()
+    {
+        this.channelListSelect.addSelectionListener(selectionEvent ->
+        {
+            this.currentSelectedChannel = selectionEvent.getAllSelectedItems().iterator().next();
+            this.joinChannelButton.setCaption(String.format("Join %s Channel", this.currentSelectedChannel));
+        });
+    }
+
+    public ChatClient getClient()
+    {
+        final ChannelMessageUserComponent parent = (ChannelMessageUserComponent) this.getParent();
+        return parent.getClient();
     }
 
     public void setChannels(final Set<String> channelNameSet)
     {
+        channelNameSet.add("asd");
+        channelNameSet.add("asd1");
+        channelNameSet.add("asd2");
         this.channelListSelect.setItems(channelNameSet);
-        this.channelListSelect.markAsDirty();
     }
 
 }

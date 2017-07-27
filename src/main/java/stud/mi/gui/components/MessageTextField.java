@@ -7,6 +7,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
+import stud.mi.client.ChatClient;
 import stud.mi.gui.ChatView;
 import stud.mi.message.MessageUtil;
 
@@ -38,16 +39,21 @@ public class MessageTextField extends HorizontalLayout
 
     private void addClickListener()
     {
-        final ChatView view = (ChatView) this.getParent();
         this.sendButton.addClickListener(event ->
         {
-            if (view.getClient() != null && view.getClient().isConnectedToChannel())
+            if (this.getClient() != null && this.getClient().isConnectedToChannel())
             {
                 final String message = this.sendTextField.getValue();
-                view.getClient().send(MessageUtil.buildSendMessage(message, view.getClient().getUserID()).toJson());
+                this.getClient().send(MessageUtil.buildSendMessage(message, this.getClient().getUserID()).toJson());
                 this.sendTextField.clear();
             }
         });
+    }
+
+    public ChatClient getClient()
+    {
+        final ChatView view = (ChatView) this.getParent();
+        return view.getClient();
     }
 
 }

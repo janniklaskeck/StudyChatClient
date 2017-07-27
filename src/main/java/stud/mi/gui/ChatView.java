@@ -1,5 +1,6 @@
 package stud.mi.gui;
 
+import org.java_websocket.WebSocket.READYSTATE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,11 +26,12 @@ public class ChatView extends GridLayout implements View
     private static final long serialVersionUID = -5681201225902032837L;
 
     private final Label titleLabel = new Label("Student Chat Server");
-    private transient ChatClient client = new ChatClient(ClientUtils.getServerURI());
+    private transient ChatClient client;
 
     public ChatView()
     {
         super(3, 4);
+        this.resetClient();
         this.setSizeFull();
 
         this.setupComponents();
@@ -59,7 +61,16 @@ public class ChatView extends GridLayout implements View
 
     public ChatClient getClient()
     {
+        if (this.client == null || this.client.getReadyState() == READYSTATE.CLOSED)
+        {
+            this.resetClient();
+        }
         return this.client;
+    }
+
+    private void resetClient()
+    {
+        this.client = new ChatClient(ClientUtils.getServerURI());
     }
 
     private void setupComponents()
@@ -75,5 +86,7 @@ public class ChatView extends GridLayout implements View
         this.titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
         this.titleLabel.addStyleName(ValoTheme.LABEL_H1);
         this.setComponentAlignment(this.titleLabel, Alignment.TOP_CENTER);
+
+        cmuComponent.addListeners();
     }
 }
