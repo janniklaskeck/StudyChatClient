@@ -1,5 +1,8 @@
 package stud.mi.gui.components;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -9,11 +12,10 @@ import com.vaadin.ui.themes.ValoTheme;
 
 import stud.mi.client.ChatClient;
 import stud.mi.gui.ChatView;
-import stud.mi.message.MessageUtil;
 
 public class MessageTextField extends HorizontalLayout
 {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageTextField.class);
     private static final long serialVersionUID = -2240425973489197267L;
 
     private final Button sendButton = new Button("Send Message");
@@ -41,11 +43,12 @@ public class MessageTextField extends HorizontalLayout
     {
         this.sendButton.addClickListener(event ->
         {
-            if (this.getClient() != null && this.getClient().isConnectedToChannel())
+            if (this.getClient() != null)
             {
                 final String message = this.sendTextField.getValue();
-                this.getClient().send(MessageUtil.buildSendMessage(message, this.getClient().getUserID()).toJson());
+                this.getClient().sendMessage(message);
                 this.sendTextField.clear();
+                LOGGER.trace("Send Message with content: '{}'.", message);
             }
         });
     }

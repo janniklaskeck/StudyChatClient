@@ -11,7 +11,6 @@ import com.vaadin.ui.TextField;
 
 import stud.mi.client.ChatClient;
 import stud.mi.gui.ChatView;
-import stud.mi.message.MessageUtil;
 
 public class LoginTextField extends HorizontalLayout
 {
@@ -46,11 +45,10 @@ public class LoginTextField extends HorizontalLayout
             }
             else
             {
-                final boolean connectionSuccessful = this.connectToServer();
+                final String userName = this.userNameTextField.getValue();
+                final boolean connectionSuccessful = this.getClient().connectToServer(userName);
                 if (connectionSuccessful)
                 {
-                    final String userName = this.userNameTextField.getValue();
-                    this.getClient().send(MessageUtil.buildUserJoinMessage(userName).toJson());
                     this.connectButton.setCaption(DISCONNECT_TEXT);
                     this.userNameTextField.setEnabled(false);
                 }
@@ -59,26 +57,8 @@ public class LoginTextField extends HorizontalLayout
                     LOGGER.error("Connection to Server was unsuccessful!");
                     Notification.show("Could not connect to Server!", Notification.Type.ERROR_MESSAGE);
                 }
-
             }
         });
-    }
-
-    private boolean connectToServer()
-    {
-        if (!"".equals(this.userNameTextField.getValue()))
-        {
-            try
-            {
-                return this.getClient().connectBlocking();
-            }
-            catch (InterruptedException e)
-            {
-                LOGGER.error("Connecting was interrupted.", e);
-                Thread.currentThread().interrupt();
-            }
-        }
-        return false;
     }
 
     private ChatClient getClient()

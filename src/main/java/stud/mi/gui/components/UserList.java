@@ -1,7 +1,5 @@
 package stud.mi.gui.components;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,6 +9,8 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
+
+import stud.mi.client.ChatClient;
 
 public class UserList extends GridLayout
 {
@@ -29,15 +29,24 @@ public class UserList extends GridLayout
         this.setComponentAlignment(this.userListSelect, Alignment.TOP_LEFT);
         this.setWidth("100%");
         this.setHeight(ChannelMessageUserComponent.COMPONENT_HEIGHT);
+        this.addListener();
     }
 
-    public void setUsers(final String userNames)
+    private void addListener()
     {
-        final Set<String> userNameSet = new HashSet<>();
-        final String[] namesSplit = userNames.split(",");
-        userNameSet.addAll(Arrays.asList(namesSplit));
-        this.userListSelect.setItems(userNameSet);
-        UserList.LOGGER.info("Set UserList with {} entries", userNameSet.size());
+        this.getClient().setOnUserListUpdateListener(() -> this.setUsers(this.getClient().userList));
+    }
+
+    private ChatClient getClient()
+    {
+        final ChannelMessageUserComponent parent = (ChannelMessageUserComponent) this.getParent();
+        return parent.getClient();
+    }
+
+    private void setUsers(final Set<String> userNames)
+    {
+        this.userListSelect.setItems(userNames);
+        UserList.LOGGER.debug("Set UserList with {} entries", userNames.size());
     }
 
 }

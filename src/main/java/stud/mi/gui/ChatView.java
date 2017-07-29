@@ -20,7 +20,6 @@ import stud.mi.util.ClientUtils;
 
 public class ChatView extends GridLayout implements View
 {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatView.class);
 
     private static final long serialVersionUID = -5681201225902032837L;
@@ -42,21 +41,13 @@ public class ChatView extends GridLayout implements View
 
     public void closeConnection()
     {
-        try
-        {
-            this.client.closeBlocking();
-        }
-        catch (InterruptedException e)
-        {
-            ChatView.LOGGER.error("Closing of CLient was interrupted.", e);
-            Thread.currentThread().interrupt();
-        }
+        this.client.disconnect();
     }
 
     @Override
     public void enter(final ViewChangeListener.ViewChangeEvent viewChangeEvent)
     {
-        ChatView.LOGGER.info("Entered ChatView.");
+        LOGGER.info("Entered ChatView.");
     }
 
     public ChatClient getClient()
@@ -86,7 +77,5 @@ public class ChatView extends GridLayout implements View
         this.titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
         this.titleLabel.addStyleName(ValoTheme.LABEL_H1);
         this.setComponentAlignment(this.titleLabel, Alignment.TOP_CENTER);
-
-        cmuComponent.addListeners();
     }
 }
