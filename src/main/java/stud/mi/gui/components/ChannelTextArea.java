@@ -10,6 +10,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 import stud.mi.client.ChatClient;
+import stud.mi.gui.ChatView;
 import stud.mi.message.Message;
 
 public class ChannelTextArea extends Panel
@@ -22,17 +23,13 @@ public class ChannelTextArea extends Panel
     public ChannelTextArea()
     {
         super();
-        this.setSizeFull();
         this.setContent(this.verticalLayout);
-        this.setWidth("100%");
-        this.setHeight(ChannelMessageUserComponent.COMPONENT_HEIGHT);
-        this.addListener();
+        this.setHeight("100%");
     }
 
-    private void addListener()
+    public void init()
     {
-        final ChatClient client = this.getClient();
-        client.setChatMessageListener(this::addMessage);
+        this.getClient().setChatMessageListener(this::addMessage);
     }
 
     public void addMessage(final Message msg)
@@ -49,7 +46,7 @@ public class ChannelTextArea extends Panel
 
     private ChatClient getClient()
     {
-        final ChannelMessageUserComponent parent = (ChannelMessageUserComponent) this.getParent();
+        final ChatView parent = (ChatView) this.getParent();
         return parent.getClient();
     }
 }

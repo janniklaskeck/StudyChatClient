@@ -5,14 +5,14 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.VerticalLayout;
 
 import stud.mi.client.ChatClient;
+import stud.mi.gui.ChatView;
 
-public class UserList extends GridLayout
+public class UserList extends VerticalLayout
 {
     private static final long serialVersionUID = -3374744713057686297L;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserList.class);
@@ -21,25 +21,22 @@ public class UserList extends GridLayout
 
     public UserList()
     {
-        super(1, 2);
-        this.addComponent(this.userListLabel, 0, 0);
-        this.addComponent(this.userListSelect, 0, 1);
+        super();
+        this.addComponent(this.userListLabel);
+        this.addComponent(this.userListSelect);
         this.userListLabel.setWidth("100%");
         this.userListSelect.setWidth("100%");
-        this.setComponentAlignment(this.userListSelect, Alignment.TOP_LEFT);
-        this.setWidth("100%");
-        this.setHeight(ChannelMessageUserComponent.COMPONENT_HEIGHT);
-        this.addListener();
+        this.setSpacing(false);
     }
 
-    private void addListener()
+    public void init()
     {
         this.getClient().setOnUserListUpdateListener(() -> this.setUsers(this.getClient().userList));
     }
 
     private ChatClient getClient()
     {
-        final ChannelMessageUserComponent parent = (ChannelMessageUserComponent) this.getParent();
+        final ChatView parent = (ChatView) this.getParent();
         return parent.getClient();
     }
 

@@ -5,42 +5,43 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.VerticalLayout;
 
 import stud.mi.client.ChatClient;
+import stud.mi.gui.ChatView;
 
-public class ChannelList extends GridLayout
+public class ChannelList extends VerticalLayout
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChannelList.class);
     private static final long serialVersionUID = -8755547118255795442L;
 
     private final Label channelListLabel = new Label("Channel List");
     private final ComboBox<String> channelComboBox = new ComboBox<>();
+    private final ListSelect<String> channelListSelect = new ListSelect<>();
     private final Button joinChannelButton = new Button("Join default Channel");
     private String currentSelectedChannel = "default";
 
     public ChannelList()
     {
-        super(1, 4);
-        this.addComponent(this.channelListLabel, 0, 0);
-        this.addComponent(this.channelComboBox, 0, 1);
-        this.addComponent(this.joinChannelButton, 0, 3);
+        super();
+        this.addComponent(this.channelListLabel);
+        this.addComponent(this.channelComboBox);
+        this.addComponent(this.channelListSelect);
+        this.addComponent(this.joinChannelButton);
         this.channelListLabel.setWidth("100%");
         this.channelComboBox.setWidth("100%");
+        this.channelListSelect.setWidth("100%");
         this.joinChannelButton.setWidth("100%");
-        this.setComponentAlignment(this.channelComboBox, Alignment.TOP_LEFT);
-        this.setComponentAlignment(this.joinChannelButton, Alignment.TOP_LEFT);
-        this.setWidth("100%");
-        this.setHeight(ChannelMessageUserComponent.COMPONENT_HEIGHT);
-        this.addListeners();
+
+        this.setSpacing(false);
         this.channelComboBox.setEmptySelectionAllowed(false);
     }
 
-    private void addListeners()
+    public void init()
     {
         this.joinChannelButton.addClickListener(event ->
         {
@@ -63,7 +64,7 @@ public class ChannelList extends GridLayout
 
     private ChatClient getClient()
     {
-        final ChannelMessageUserComponent parent = (ChannelMessageUserComponent) this.getParent();
+        final ChatView parent = (ChatView) this.getParent();
         return parent.getClient();
     }
 

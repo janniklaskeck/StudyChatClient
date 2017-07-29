@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
@@ -36,6 +37,7 @@ public class MessageTextField extends HorizontalLayout
         this.setExpandRatio(this.sendButton, 0.2f);
         this.setComponentAlignment(this.sendButton, Alignment.MIDDLE_LEFT);
         this.setWidth("100%");
+        this.setMargin(new MarginInfo(true, false));
         this.addClickListener();
     }
 

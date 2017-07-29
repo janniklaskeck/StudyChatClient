@@ -3,6 +3,7 @@ package stud.mi.gui.components;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
@@ -30,6 +31,7 @@ public class LoginTextField extends HorizontalLayout
         this.addComponent(this.userNameLabel);
         this.addComponent(this.userNameTextField);
         this.addComponent(this.connectButton);
+        this.setComponentAlignment(this.userNameLabel, Alignment.MIDDLE_CENTER);
         this.addClickListener();
     }
 

@@ -13,9 +13,11 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 
 import stud.mi.client.ChatClient;
-import stud.mi.gui.components.ChannelMessageUserComponent;
+import stud.mi.gui.components.ChannelList;
+import stud.mi.gui.components.ChannelTextArea;
 import stud.mi.gui.components.LoginTextField;
 import stud.mi.gui.components.MessageTextField;
+import stud.mi.gui.components.UserList;
 import stud.mi.util.ClientUtils;
 
 public class ChatView extends GridLayout implements View
@@ -27,9 +29,11 @@ public class ChatView extends GridLayout implements View
     private final Label titleLabel = new Label("Student Chat Server");
     private transient ChatClient client;
 
+    public static final String COMPONENT_HEIGHT = "275px";
+
     public ChatView()
     {
-        super(3, 4);
+        super(7, 4);
         this.resetClient();
         this.setSizeFull();
 
@@ -37,6 +41,7 @@ public class ChatView extends GridLayout implements View
 
         this.setMargin(new MarginInfo(false, true, true, true));
         this.setStyleName(ValoTheme.LAYOUT_CARD);
+
     }
 
     public void closeConnection()
@@ -66,16 +71,27 @@ public class ChatView extends GridLayout implements View
 
     private void setupComponents()
     {
-        final ChannelMessageUserComponent cmuComponent = new ChannelMessageUserComponent();
         final MessageTextField messageTextField = new MessageTextField();
         final LoginTextField loginTextField = new LoginTextField();
-        this.addComponent(this.titleLabel, 0, 0, 2, 0);
-        this.addComponent(cmuComponent, 0, 1, 2, 1);
-        this.addComponent(messageTextField, 0, 2, 2, 2);
-        this.addComponent(loginTextField, 0, 3, 1, 3);
+        final ChannelList channelList = new ChannelList();
+        final ChannelTextArea channelTextArea = new ChannelTextArea();
+        final UserList userList = new UserList();
+        this.addComponent(this.titleLabel, 0, 0, 6, 0);
+        this.addComponent(channelList, 0, 1, 1, 1);
+        this.addComponent(channelTextArea, 2, 1, 4, 1);
+        this.addComponent(userList, 5, 1, 6, 1);
+        this.addComponent(messageTextField, 0, 2, 6, 2);
+        this.addComponent(loginTextField, 0, 3, 6, 3);
+
+        userList.init();
+        channelList.init();
+        channelTextArea.init();
 
         this.titleLabel.addStyleName(ValoTheme.LABEL_HUGE);
         this.titleLabel.addStyleName(ValoTheme.LABEL_H1);
         this.setComponentAlignment(this.titleLabel, Alignment.TOP_CENTER);
+        this.setComponentAlignment(channelList, Alignment.TOP_CENTER);
+        this.setComponentAlignment(channelTextArea, Alignment.TOP_CENTER);
+        this.setComponentAlignment(userList, Alignment.TOP_CENTER);
     }
 }
