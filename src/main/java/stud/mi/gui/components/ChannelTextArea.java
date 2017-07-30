@@ -30,6 +30,7 @@ public class ChannelTextArea extends Panel
     public void init()
     {
         this.getClient().setChatMessageListener(this::addMessage);
+        this.getClient().setChannelJoinListener(this.verticalLayout::removeAllComponents);
     }
 
     public void addMessage(final Message msg)

@@ -1,12 +1,12 @@
 package stud.mi.gui.components;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.ui.Button;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.VerticalLayout;
@@ -20,25 +20,21 @@ public class ChannelList extends VerticalLayout
     private static final long serialVersionUID = -8755547118255795442L;
 
     private final Label channelListLabel = new Label("Channel List");
-    private final ComboBox<String> channelComboBox = new ComboBox<>();
     private final ListSelect<String> channelListSelect = new ListSelect<>();
-    private final Button joinChannelButton = new Button("Join default Channel");
-    private String currentSelectedChannel = "default";
+    private final Button joinChannelButton = new Button("Join Lobby");
+    private String currentSelectedChannel = "Lobby";
 
     public ChannelList()
     {
         super();
         this.addComponent(this.channelListLabel);
-        this.addComponent(this.channelComboBox);
         this.addComponent(this.channelListSelect);
         this.addComponent(this.joinChannelButton);
         this.channelListLabel.setWidth("100%");
-        this.channelComboBox.setWidth("100%");
         this.channelListSelect.setWidth("100%");
         this.joinChannelButton.setWidth("100%");
 
         this.setSpacing(false);
-        this.channelComboBox.setEmptySelectionAllowed(false);
     }
 
     public void init()
@@ -51,14 +47,18 @@ public class ChannelList extends VerticalLayout
                 LOGGER.info("Joining Channel '{}'.", this.currentSelectedChannel);
             }
         });
-        this.channelComboBox.addSelectionListener(selectionEvent ->
+
+        this.channelListSelect.addSelectionListener(event ->
         {
-            if (selectionEvent.getSelectedItem().isPresent())
+            final Optional<String> firstSelectedItem = event.getFirstSelectedItem();
+            if (firstSelectedItem.isPresent())
             {
-                this.currentSelectedChannel = selectionEvent.getSelectedItem().get();
-                this.joinChannelButton.setCaption(String.format("Join %s Channel", this.currentSelectedChannel));
+                this.joinChannelButton.setCaption(String.format("Join %s", firstSelectedItem.get()));
+                this.currentSelectedChannel = firstSelectedItem.get();
+                LOGGER.debug("Select Channel '{}'.", firstSelectedItem.get());
             }
         });
+
         this.getClient().setOnChannelListUpdateListener(() -> this.setChannels(this.getClient().channelList));
     }
 
@@ -70,7 +70,8 @@ public class ChannelList extends VerticalLayout
 
     private void setChannels(final Set<String> channelNameSet)
     {
-        this.channelComboBox.setItems(channelNameSet);
+        this.channelListSelect.setItems(channelNameSet);
+        this.channelListSelect.markAsDirty();
         LOGGER.debug("Updated Channel List with {} items.", channelNameSet.size());
     }
 

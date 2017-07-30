@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.java_websocket.WebSocket.READYSTATE;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class ChatClient extends WebSocketClient
 
     public final Set<String> userList = new HashSet<>();
     private ChannelUpdateListener onUserListUpdateListener;
+
+    private ChannelUpdateListener onChannelJoinListener;
 
     private Timer heartBeatTimer;
 
@@ -86,6 +89,7 @@ public class ChatClient extends WebSocketClient
             break;
         case MessageType.ACK_CHANNEL_JOIN:
             this.channel = msg.getChannelName();
+            this.onChannelJoinListener.onUpdate();
             break;
         case MessageType.CHANNEL_MESSAGE:
             this.addMessage(msg);
@@ -106,11 +110,13 @@ public class ChatClient extends WebSocketClient
         this.channelList.clear();
         this.channelList.addAll(channelNames);
         this.onChannelListUpdateListener.onUpdate();
+        LOGGER.debug("Received {} Channels.", channelNames.size());
     }
 
     public void stopTimer()
     {
         this.heartBeatTimer.cancel();
+        LOGGER.debug("Stopped Heartbeat Timer.");
     }
 
     private void userJoinedChannel(final List<String> channelUserNames)
@@ -118,6 +124,7 @@ public class ChatClient extends WebSocketClient
         this.userList.clear();
         this.userList.addAll(channelUserNames);
         this.onUserListUpdateListener.onUpdate();
+        LOGGER.debug("Received {} Users.", channelUserNames.size());
     }
 
     private void addMessage(final Message msg)
@@ -125,6 +132,7 @@ public class ChatClient extends WebSocketClient
         if (this.chatMessageListener != null)
         {
             this.chatMessageListener.onMessage(msg);
+            LOGGER.debug("Add Message {}", msg.toJson());
         }
     }
 
@@ -135,8 +143,9 @@ public class ChatClient extends WebSocketClient
             try
             {
                 this.closeBlocking();
+                LOGGER.debug("Closed Connection to Server.");
             }
-            catch (InterruptedException e)
+            catch (final InterruptedException e)
             {
                 LOGGER.error("Could not close Connection!", e);
                 Thread.currentThread().interrupt();
@@ -163,6 +172,11 @@ public class ChatClient extends WebSocketClient
         }, 1000L, HEARTBEAT_RATE);
     }
 
+    public void setChannelJoinListener(final ChannelUpdateListener listener)
+    {
+        this.onChannelJoinListener = listener;
+    }
+
     public String getChannel()
     {
         return this.channel;
@@ -174,6 +188,11 @@ public class ChatClient extends WebSocketClient
     }
 
     public boolean isConnected()
+    {
+        return this.getReadyState() == READYSTATE.OPEN;
+    }
+
+    public boolean isRegistered()
     {
         return this.userID != -1L;
     }
@@ -199,13 +218,18 @@ public class ChatClient extends WebSocketClient
         if (this.isConnected())
         {
             super.send(msg);
+            LOGGER.trace("Send Message to Server: '{}'", msg);
         }
     }
 
-    public void changeChannel(final String currentSelectedChannel)
+    public void changeChannel(final String newChannel)
     {
-        final String msg = MessageUtil.buildChannelJoinMessage(currentSelectedChannel, this.getUserID()).toJson();
-        this.send(msg);
+        if (this.isRegistered())
+        {
+            final String msg = MessageUtil.buildChannelJoinMessage(newChannel, this.getUserID()).toJson();
+            this.send(msg);
+            LOGGER.debug("Change Channel to '{}'", newChannel);
+        }
     }
 
     public void sendMessage(final String message)
@@ -213,6 +237,7 @@ public class ChatClient extends WebSocketClient
         if (this.isConnectedToChannel())
         {
             this.send(MessageUtil.buildSendMessage(message, this.getUserID()).toJson());
+            LOGGER.debug("Send Message '{}' to current Channel.", message);
         }
     }
 
@@ -225,11 +250,13 @@ public class ChatClient extends WebSocketClient
                 final boolean wasConnectionSuccessful = this.connectBlocking();
                 if (wasConnectionSuccessful)
                 {
+                    LOGGER.debug("Connected successfully to Server.");
                     this.send(MessageUtil.buildUserJoinMessage(userName).toJson());
+                    LOGGER.debug("Try to register Username '{}'.", userName);
                 }
                 return wasConnectionSuccessful;
             }
-            catch (InterruptedException e)
+            catch (final InterruptedException e)
             {
                 LOGGER.error("Connecting was interrupted.", e);
                 Thread.currentThread().interrupt();
