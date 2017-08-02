@@ -59,7 +59,7 @@ public class ChatView extends GridLayout implements View
     {
         if (this.client == null || this.client.getReadyState() == READYSTATE.CLOSED)
         {
-            this.resetClient();
+            this.resetClient(this.client);
         }
         return this.client;
     }
@@ -67,6 +67,18 @@ public class ChatView extends GridLayout implements View
     private void resetClient()
     {
         this.client = new ChatClient(ClientUtils.getServerURI());
+    }
+
+    private void resetClient(final ChatClient oldClient)
+    {
+        if (oldClient != null)
+        {
+            this.client = new ChatClient(ClientUtils.getServerURI(), oldClient);
+        }
+        else
+        {
+            this.resetClient();
+        }
     }
 
     private void setupComponents()

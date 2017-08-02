@@ -14,6 +14,9 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
 import stud.mi.message.Message;
 import stud.mi.message.MessageType;
 import stud.mi.message.MessageUtil;
@@ -43,8 +46,19 @@ public class ChatClient extends WebSocketClient
     public ChatClient(final URI serverURI)
     {
         super(serverURI);
-        LOGGER.info("Created ChatClient with Server URI {}.", serverURI);
+        LOGGER.info("Created ChatClient with Server  URI {}.", serverURI);
         this.setupHeartBeat();
+    }
+
+    public ChatClient(final URI serverURI, final ChatClient oldClient)
+    {
+        super(serverURI);
+        this.setupHeartBeat();
+        this.chatMessageListener = oldClient.chatMessageListener;
+        this.onChannelListUpdateListener = oldClient.onChannelListUpdateListener;
+        this.onChannelJoinListener = oldClient.onChannelJoinListener;
+        this.onUserListUpdateListener = oldClient.onUserListUpdateListener;
+        LOGGER.info("Created ChatClient with Server  URI {}.", serverURI);
     }
 
     @Override
@@ -89,10 +103,12 @@ public class ChatClient extends WebSocketClient
             break;
         case MessageType.ACK_CHANNEL_JOIN:
             this.channel = msg.getChannelName();
-            this.onChannelJoinListener.onUpdate();
             break;
         case MessageType.CHANNEL_MESSAGE:
             this.addMessage(msg);
+            break;
+        case MessageType.CHANNEL_HISTORY:
+            this.addHistory(msg);
             break;
         case MessageType.CHANNEL_USER_CHANGE:
             this.userJoinedChannel(msg.getChannelUserNames());
@@ -102,6 +118,16 @@ public class ChatClient extends WebSocketClient
             break;
         default:
             LOGGER.error("Message Type unknown: {}", msg.getType());
+        }
+    }
+
+    private void addHistory(final Message msg)
+    {
+        final JsonArray msgArray = msg.getContent().get("channelHistory").getAsJsonArray();
+        LOGGER.debug("Adding {} History messages", msgArray.size());
+        for (final JsonElement element : msgArray)
+        {
+            this.addMessage(new Message(element.getAsJsonObject()));
         }
     }
 
@@ -142,6 +168,7 @@ public class ChatClient extends WebSocketClient
         {
             try
             {
+                this.onChannelJoinListener.onUpdate();
                 this.closeBlocking();
                 LOGGER.debug("Closed Connection to Server.");
             }
@@ -228,6 +255,7 @@ public class ChatClient extends WebSocketClient
         {
             final String msg = MessageUtil.buildChannelJoinMessage(newChannel, this.getUserID()).toJson();
             this.send(msg);
+            this.onChannelJoinListener.onUpdate();
             LOGGER.debug("Change Channel to '{}'", newChannel);
         }
     }
